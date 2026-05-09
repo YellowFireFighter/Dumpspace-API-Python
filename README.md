@@ -1,77 +1,55 @@
-# DumpspaceAPI
+# Dumpspace API (Python)
 
-The dumpspace API allows you to get your Games' info directly from the Dumpspace website to use it in your C++ project.
+Python library for reading Dumpspace game metadata directly from the Dumpspace JSON/GZIP endpoints.
 
-This library uses [Curl](https://github.com/curl/curl), [Zlib](https://github.com/madler/zlib), [OpenSSL](https://github.com/openssl/openssl) and [JSON](https://github.com/nlohmann/json).
-Please look up the licenses for these projects. 
+## Installation
 
-Additionally, in the ``libs/`` folder are precompiled libraries for the sake of clarity and demonstration, however I **strongly suggest** to compile the libraries on your own and use them instead to have the latest version and using precompiled libraries from the internet is bad practice in general, you never know whats in them.
-
-### Example
-All examples are shown within the ``DumpspaceAPI.cpp`` file:
-
-- First we create a DSAPI object with the hash of the game. You can get the hash out of the url
-
-   - example url: ``...dumpspace/main/Games/index.html?hash=6b77eceb <----``
-```c++
-DSAPI api = DSAPI("6b77eceb");
+```bash
+pip install .
 ```
 
-- Downloads all JSONs to use the API
-```c++
-api.downloadContent();
-```
-- Gets any offset of the OFFSETS tab
-```c++
-const auto UWorldOffset = api.getOffset("OFFSET_UWORLD");
-printf("UWorld offset: 0x%llX\n", UWorldOffset);
-```
+## Usage
 
-- Gets the size of any defined class or struct
-```c++
-const auto classSize = api.getSizeofClass("AActor");
-printf("AActor class size: 0x%X\n", classSize);
-```
+```python
+from dumpspace_api import DSAPI
 
-- Gets the OffsetInfo of a member within a class or struct
-```c++
-const auto offset = api.getOffset("UWorld", "OwningGameInstance");
+# Hash from the Dumpspace game URL
+api = DSAPI("6b77eceb")
 
-// is it valid?
-if (!offset)
-    DebugBreak();
+# Download all content types (classes, structs, enums, functions, offsets)
+api.download_content()
 
-printf("OwningGameInstance offset: 0x%llX size: 0x%llX\n", offset.offset, offset.size);
-```
+u_world_offset = api.get_offset("OFFSET_UWORLD")
+print(f"UWorld offset: 0x{u_world_offset:X}")
 
-- Get the function offset of a function
-```c++
-const auto functionOffset = api.getFunctionOffset("AFortWeapon", "WeaponDataIsValid");
-printf("AFortWeapon::WeaponDataIsValid offset 0x%llX\n", functionOffset);
+class_size = api.get_sizeof_class("AActor")
+print(f"AActor class size: 0x{class_size:X}")
+
+offset = api.get_offset("UWorld", "OwningGameInstance")
+if offset:
+    print(f"OwningGameInstance offset: 0x{offset.offset:X} size: 0x{offset.size:X}")
+
+function_offset = api.get_function_offset("AFortWeapon", "WeaponDataIsValid")
+print(f"AFortWeapon::WeaponDataIsValid offset: 0x{function_offset:X}")
+
+enum_name = api.get_enum_name("EFortRarity", 4)
+print(f"EFortRarity type 4: {enum_name}")
 ```
 
-- Get the name of an enum from an enum class.
-   - Imagine we read the rarity of a item and get the value 4
-```c++
-enum class EFortRarity : uint8_t {
-    EFortRarity__Common = 0,
-    EFortRarity__Uncommon = 1,
-    EFortRarity__Rare = 2,
-    EFortRarity__Epic = 3,
-    EFortRarity__Legendary = 4, // <---- it will return this name
-    EFortRarity__Mythic = 5,
-    EFortRarity__Transcendent = 6,
-    ...
-};
+## Public API
+
+- `DSAPI(game_hash: str)`
+- `download_content(types=ContentTypes.ALL)`
+- `get_offset(name)` for global offsets
+- `get_offset(class_name, member_name)` for member offset info
+- `get_sizeof_class(class_name)`
+- `get_function_offset(function_class, function_name)`
+- `get_enum_name(enum_class, value)`
+
+## Development
+
+Run tests with:
+
+```bash
+python -m unittest discover -s tests -v
 ```
-
-```c++
-const auto enumName = api.getEnumName("EFortRarity", 4);
-printf("EFortRarity type 4: %s\n", enumName.c_str());
-```
-
-### Showcase
-
-Compiling the project would display this:
-
-![alt text](image.png)
