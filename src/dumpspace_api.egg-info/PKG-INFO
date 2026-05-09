@@ -1,0 +1,75 @@
+Metadata-Version: 2.4
+Name: dumpspace-api
+Version: 0.1.0
+Summary: Python library for reading Dumpspace game metadata.
+Author: DumpspaceAPI contributors
+License: MIT
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+Dynamic: license-file
+
+# Dumpspace API (Python)
+
+Python library for reading Dumpspace game metadata directly from the Dumpspace JSON/GZIP endpoints.
+
+## Installation
+
+```bash
+pip install .
+```
+
+## Usage
+
+```python
+from dumpspace_api import DSAPI
+
+# Hash from the Dumpspace game URL
+api = DSAPI("6b77eceb")
+
+# Download all content types (classes, structs, enums, functions, offsets)
+api.download_content()
+
+u_world_offset = api.get_offset("OFFSET_UWORLD")
+print(f"UWorld offset: 0x{u_world_offset:X}")
+
+class_size = api.get_sizeof_class("AActor")
+print(f"AActor class size: 0x{class_size:X}")
+
+offset = api.get_offset("UWorld", "OwningGameInstance")
+if offset:
+    print(f"OwningGameInstance offset: 0x{offset.offset:X} size: 0x{offset.size:X}")
+
+function_offset = api.get_function_offset("AFortWeapon", "WeaponDataIsValid")
+print(f"AFortWeapon::WeaponDataIsValid offset: 0x{function_offset:X}")
+
+enum_name = api.get_enum_name("EFortRarity", 4)
+print(f"EFortRarity type 4: {enum_name}")
+```
+
+## Public API
+
+- `DSAPI(game_hash: str)`
+- `download_content(types=ContentTypes.ALL)`
+- `get_offset(name)` for global offsets
+- `get_offset(class_name, member_name)` for member offset info
+- `get_sizeof_class(class_name)`
+- `get_function_offset(function_class, function_name)`
+- `get_enum_name(enum_class, value)`
+
+## Development
+
+Run tests with:
+
+```bash
+python -m unittest discover -s tests -v
+```

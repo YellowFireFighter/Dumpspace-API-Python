@@ -87,6 +87,7 @@ class DSAPITests(unittest.TestCase):
         self.assertTrue(offset)
         self.assertEqual(offset.offset, 16)
         self.assertEqual(offset.size, 8)
+        self.assertFalse(offset.is_bit)
 
         bit_offset = api.get_offset("UWorld", "bReplicated")
         self.assertTrue(bit_offset)

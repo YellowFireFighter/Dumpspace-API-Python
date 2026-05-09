@@ -5,7 +5,7 @@ import json
 from dataclasses import dataclass
 from enum import IntFlag
 from threading import Lock
-from typing import Callable, Dict, Iterable, Optional
+from typing import Callable, Dict, Iterable, Optional, Union
 from urllib.request import urlopen
 
 
@@ -133,7 +133,7 @@ class DSAPI:
             for offset_entry in offset_json.get("data", []):
                 self.offset_map[str(offset_entry[0])] = int(offset_entry[1])
 
-    def get_offset(self, class_name: str, member_name: Optional[str] = None):
+    def get_offset(self, class_name: str, member_name: Optional[str] = None) -> Union[int, OffsetInfo]:
         if member_name is None:
             return self.offset_map.get(class_name, 0)
         return self.class_member_map.get(f"{class_name}{member_name}", OffsetInfo())
